@@ -1,6 +1,7 @@
 #include <cmath>
 #include <functional>
 
+#include "diagnostic_msgs/msg/diagnostic_array.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/imu.hpp"
 #include "tf2/LinearMath/Matrix3x3.h"
@@ -11,6 +12,9 @@ using std::placeholders::_1;
 
 using ImuMsg = sensor_msgs::msg::Imu;
 using TiltStatusMsg = tilt_detection_msgs::msg::TiltStatus;
+using DiagnosticArray = diagnostic_msgs::msg::DiagnosticArray;
+using DiagnosticStatus = diagnostic_msgs::msg::DiagnosticStatus;
+using KeyValue = diagnostic_msgs::msg::KeyValue;
 using OrientationEstimator = tilt_detection::tools::OrientationEstimator;
 using Quaternion = geometry_msgs::msg::Quaternion;
 
@@ -28,10 +32,20 @@ public:
         : Node("tilt_detection_node")
     {
         RCLCPP_INFO(get_logger(), "Tilt detection started");
+
+        declare_parameter("publish_diagnostics", rclcpp::PARAMETER_BOOL);
         declare_parameter("publish_orientation", rclcpp::PARAMETER_BOOL);
+
+        publish_diagnostics_ = this->get_parameter("publish_diagnostics").as_bool();
         publish_orientation_ = this->get_parameter("publish_orientation").as_bool();
+
         subscription_ = create_subscription<ImuMsg>("/imu/data_raw", 10, std::bind(&TiltDetector::data_ready_callback, this, _1));
+
         tilt_status_publisher_ = create_publisher<TiltStatusMsg>("/tilt/status", 10);
+        if(publish_diagnostics_)
+        {
+            diagnostic_publisher_ = create_publisher<DiagnosticArray>("/diagnostics", 10);
+        }
         if(publish_orientation_)
         {
             orientation_publisher_ = create_publisher<Quaternion>("/imu/orientation", 10);
@@ -54,19 +68,43 @@ private:
         tilt_status.tilted = tilt_angle > TILT_THRESHOLD;
         tilt_status_publisher_->publish(tilt_status);
 
+        if(publish_diagnostics_)
+        {
+            DiagnosticStatus emu_status;
+            emu_status.name = "EMU";
+            emu_status.level = DiagnosticStatus::OK;
+            emu_status.message = "EMU up and running";
+
+            KeyValue emergency_stop_diag;
+            emergency_stop_diag.key = "Emergency stop button";
+            emergency_stop_diag.value = "Released";
+
+            KeyValue tilt_angle_diag;
+            tilt_angle_diag.key = "Tilt angle in degrees";
+            tilt_angle_diag.value = std::to_string(tilt_angle * RAD_TO_DEG);
+
+            emu_status.values.push_back(emergency_stop_diag);
+            emu_status.values.push_back(tilt_angle_diag);
+
+            auto diagnostics = DiagnosticArray();
+            diagnostics.status.push_back(emu_status);
+
+            diagnostic_publisher_->publish(diagnostics);
+        }
+
         if(publish_orientation_)
         {
             orientation_publisher_->publish(q);
         }
-
-        RCLCPP_INFO(get_logger(), "Tilt angle: %f°", tilt_angle * RAD_TO_DEG);
     }
 
     rclcpp::Subscription<ImuMsg>::SharedPtr subscription_;
     rclcpp::Publisher<TiltStatusMsg>::SharedPtr tilt_status_publisher_;
+    rclcpp::Publisher<DiagnosticArray>::SharedPtr diagnostic_publisher_;
     rclcpp::Publisher<Quaternion>::SharedPtr orientation_publisher_;
     OrientationEstimator orientation_estimator_;
 
+    bool publish_diagnostics_ = false;
     bool publish_orientation_ = false;
 };
 

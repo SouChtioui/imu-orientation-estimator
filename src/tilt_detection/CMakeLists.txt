@@ -16,6 +16,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(diagnostic_msgs REQUIRED)
 find_package(tilt_detection_msgs REQUIRED)
 
 add_library(rotation_estimation src/tools/IMUComplementaryFilter.cpp src/tools/OrientationEstimator.cpp)
@@ -33,6 +34,7 @@ add_executable(tilt_detection_node src/tilt_detection_node.cpp)
 ament_target_dependencies(
   rotation_estimation
   "tf2"
+  "diagnostic_msgs"
   "tilt_detection_msgs"
 )
 target_link_libraries(

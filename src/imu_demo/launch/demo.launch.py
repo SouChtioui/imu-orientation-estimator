@@ -6,12 +6,14 @@ def generate_launch_description():
     ld = LaunchDescription()
 
     publish_orientation = True
+    publish_diagnostics = True
 
     tilt_detection_node =  Node(
         package='tilt_detection',
         executable='tilt_detection_node',
         parameters = [
-            {"publish_orientation" : publish_orientation}
+            {"publish_orientation" : publish_orientation},
+            {"publish_diagnostics" : publish_diagnostics}
         ]
     )
     ld.add_action(tilt_detection_node)

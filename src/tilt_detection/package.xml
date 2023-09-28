@@ -10,6 +10,7 @@
   <depend>rclcpp</depend>
   <depend>tf2</depend>
   <depend>sensor_msgs</depend>
+  <depend>diagnostic_msgs</depend>
   <depend>tilt_detection_msgs</depend>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
