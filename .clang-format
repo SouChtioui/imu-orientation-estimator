@@ -1,0 +1,24 @@
+# Tested on: clang-format version 12.0.0
+BasedOnStyle: Microsoft
+ColumnLimit: 170
+PointerAlignment: Left
+AccessModifierOffset: -4
+BreakConstructorInitializers: BeforeComma
+SpaceBeforeParens: Never
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: NonAssignment
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^"ui_' # UI files
+    Priority: 0
+  - Regex: "^<([^Q]|(queue))[a-z_]*(.h)?>$" # STL headers
+    Priority: 1
+  - Regex: "^<([^f]|f([^l]|l([^r]|(r[^_])))).*" # Third party headers '^<(?!flr_).+\/'
+    Priority: 2
+  - Regex: "^(<flr_).+\/" # flr headers
+    Priority: 3
+  - Regex: ".*" # The rest (aka. local headers)
+    Priority: 4
+AlwaysBreakTemplateDeclarations: Yes
+SpaceAfterTemplateKeyword: false

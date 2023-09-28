@@ -1,0 +1,48 @@
+---
+Checks: readability-identifier-naming,bugprone-*,clang-analyzer-*,concurrency-*,google-*,modernize-*,performance-*,cppcoreguidelines-*,misc-*,readability-*,-modernize-use-trailing-return-type,-modernize-use-nodiscard,-bugprone-lambda-function-name,-bugprone-easily-swappable-parameters,-cppcoreguidelines-macro-usage,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-owning-memory,-google-readability-casting,-readability-identifier-length,-readability-magic-numbers,-readability-uppercase-literal-suffix,-misc-non-private-member-variables-in-classes,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-non-private-member-variables-in-classes,-readability-implicit-bool-conversion
+CheckOptions:
+    - { key: cppcoreguidelines-avoid-do-while.IgnoreMacros, value: true }
+
+    # ----------------------- readability-identifier-naming ---------------------- #
+    - { key: readability-identifier-naming.NamespaceCase, value: lower_case }
+
+    - { key: readability-identifier-naming.ClassCase, value: CamelCase }
+
+    - { key: readability-identifier-naming.FunctionCase, value: camelBack }
+    - { key: readability-identifier-naming.FunctionIgnoredRegexp, value: "(to_json)|(from_json)|(to_string)" }
+
+    - { key: readability-identifier-naming.MemberCase, value: lower_case }
+    - { key: readability-identifier-naming.MemberSuffix, value: _ }
+
+    - { key: readability-identifier-naming.PublicMemberCase, value: lower_case }
+    - { key: readability-identifier-naming.PublicMemberSuffix, value: "" }
+    - { key: readability-identifier-naming.PublicMemberIgnoredRegexp, value: "(^[a-zA-Z]+ed$)|(^J[a-z_]*)" }
+
+    - { key: readability-identifier-naming.EnumCase, value: CamelCase }
+
+    - { key: readability-identifier-naming.EnumConstantCase, value: CamelCase }
+
+    # Not in guide lines but usual:
+    - { key: readability-identifier-naming.ParameterCase, value: lower_case }
+    - { key: readability-identifier-naming.VariableCase, value: lower_case }
+    # Exception: J for Jacobian is common
+    - { key: readability-identifier-naming.ParameterIgnoredRegexp, value: "^J[a-z_]*" }
+    - { key: readability-identifier-naming.VariableIgnoredRegexp, value: "^J[a-z_]*" }
+
+    - { key: readability-identifier-naming.TemplateParameterCase, value: CamelCase }
+
+    - { key: readability-identifier-naming.TypeAliasCase, value: CamelCase }
+
+    # To be validated:
+    - { key: readability-identifier-naming.TypeAliasSuffix, value: Type }
+    - { key: readability-identifier-naming.TypeAliasIgnoredRegexp, value: "[a-zA-Z0-9]+_t|[a-zA-Z0-9]+_type|(type)|(Ptr)|(ConstPtr)|(UPtr)|(const_)?reference" }
+
+    - { key: readability-identifier-naming.StaticConstantCase, value: CamelCase }
+    - { key: readability-identifier-naming.StaticConstantIgnoredRegexp, value: "(value)" }
+
+    - { key: readability-identifier-naming.GlobalConstantCase, value: CamelCase }
+    - { key: readability-identifier-naming.GlobalConstantIgnoredRegexp, value: "(value)" }
+
+    - { key: readability-identifier-naming.MacroDefinitionCase, value: UPPER_CASE }
+
+    - { key: readability-identifier-naming.MacroDefinitionCase, value: UPPER_CASE }
