@@ -1,3 +1,4 @@
+#include <chrono>
 #include <cmath>
 #include <functional>
 
@@ -38,6 +39,7 @@ public:
 
         publish_diagnostics_ = this->get_parameter("publish_diagnostics").as_bool();
         publish_orientation_ = this->get_parameter("publish_orientation").as_bool();
+        timer_ = this->create_wall_timer(std::chrono_literals::operator""ms(100), std::bind(&TiltDetector::timer_callback, this));
 
         subscription_ = create_subscription<ImuMsg>("/imu/data_raw", 10, std::bind(&TiltDetector::data_ready_callback, this, _1));
 
@@ -62,12 +64,19 @@ private:
         const tf2::Quaternion imu_q(q.x, q.y, q.z, q.w);
         const tf2::Matrix3x3 imu_rot(imu_q);
         const auto imu_z_axis = imu_rot.getRow(2);
-        const auto tilt_angle = std::fabs(imu_z_axis.angle(Z_AXIS));
-
+        current_tilt_angle_ = std::fabs(imu_z_axis.angle(Z_AXIS));
         auto tilt_status = TiltStatusMsg();
-        tilt_status.tilted = tilt_angle > TILT_THRESHOLD;
+        tilt_status.tilted = current_tilt_angle_ > TILT_THRESHOLD;
         tilt_status_publisher_->publish(tilt_status);
 
+        if(publish_orientation_)
+        {
+            orientation_publisher_->publish(q);
+        }
+    }
+
+    void timer_callback() const
+    {
         if(publish_diagnostics_)
         {
             DiagnosticStatus emu_status;
@@ -81,7 +90,7 @@ private:
 
             KeyValue tilt_angle_diag;
             tilt_angle_diag.key = "Tilt angle in degrees";
-            tilt_angle_diag.value = std::to_string(tilt_angle * RAD_TO_DEG);
+            tilt_angle_diag.value = std::to_string(current_tilt_angle_ * RAD_TO_DEG);
 
             emu_status.values.push_back(emergency_stop_diag);
             emu_status.values.push_back(tilt_angle_diag);
@@ -91,19 +100,15 @@ private:
 
             diagnostic_publisher_->publish(diagnostics);
         }
-
-        if(publish_orientation_)
-        {
-            orientation_publisher_->publish(q);
-        }
     }
 
     rclcpp::Subscription<ImuMsg>::SharedPtr subscription_;
     rclcpp::Publisher<TiltStatusMsg>::SharedPtr tilt_status_publisher_;
     rclcpp::Publisher<DiagnosticArray>::SharedPtr diagnostic_publisher_;
     rclcpp::Publisher<Quaternion>::SharedPtr orientation_publisher_;
+    rclcpp::TimerBase::SharedPtr timer_;
     OrientationEstimator orientation_estimator_;
-
+    double current_tilt_angle_ = 0.;
     bool publish_diagnostics_ = false;
     bool publish_orientation_ = false;
 };
